@@ -1,5 +1,7 @@
 import '../styles/TokenAnalytics.css';
 import '../styles/main.css';
+import '../components/TokenCounter.css';
+
 // Other global styles...
 
 function MyApp({ Component, pageProps }) {

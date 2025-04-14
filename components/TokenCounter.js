@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { encode } from 'gpt-tokenizer';
-import './TokenCounter.css';
 
 function TokenCounter({ content, modelName = 'gpt-3.5-turbo' }) {
   const [tokenCount, setTokenCount] = useState(0);
