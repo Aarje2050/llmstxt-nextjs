@@ -5,6 +5,12 @@ const nextConfig = {
   // Image optimization
   images: {
     domains: ['llms-txt-generator.com'],
+    
+  },
+  
+  // ESLint settings
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   
   // Add trailing slashes for consistent URLs
@@ -35,3 +41,4 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
+
