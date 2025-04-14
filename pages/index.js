@@ -8,8 +8,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { getApplicationSchema } from '../utils/StructuredData.js';
 
-import styles from '../styles/main.css';
-
 
 
 export default function Home() {
