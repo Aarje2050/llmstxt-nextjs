@@ -56,15 +56,21 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Register function
-  const register = async (name, email, password) => {
+// In contexts/AuthContext.js - update the register function
+const register = async (name, email, password) => {
     try {
       setLoading(true);
       setError(null);
       const { data } = await api.post('/api/auth/register', { name, email, password });
+      
+      // If we got a response but there was a MongoDB error, show the OTP anyway
+      // This is for development/testing when the in-memory DB fallback is active
+      console.log("Registration response:", data);
+      
       return data;
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error("Registration error:", err);
+      setError(err.response?.data?.message || 'Registration failed. Database connection issue.');
       throw err;
     } finally {
       setLoading(false);
