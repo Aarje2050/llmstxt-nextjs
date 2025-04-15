@@ -2,6 +2,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+// Base URL for your Python backend
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://llmstxt-backend.onrender.com';
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -9,13 +12,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Configure axios with credentials
+  const api = axios.create({
+    baseURL: API_URL,
+    withCredentials: true
+  });
+
   // Check if user is already authenticated on app load
   useEffect(() => {
     async function loadUserFromCookies() {
       try {
         setLoading(true);
-        // Get current authenticated user
-        const { data } = await axios.get('/api/auth/me');
+        // Get current authenticated user from backend
+        const { data } = await api.get('/api/auth/me');
         if (data.user) {
           setUser(data.user);
         }
@@ -36,7 +45,7 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      const { data } = await api.post('/api/auth/login', { email, password });
       setUser(data.user);
       return data;
     } catch (err) {
@@ -52,7 +61,7 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await axios.post('/api/auth/register', { name, email, password });
+      const { data } = await api.post('/api/auth/register', { name, email, password });
       return data;
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
@@ -67,7 +76,7 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await axios.post('/api/auth/verify', { email, otp });
+      const { data } = await api.post('/api/auth/verify', { email, otp });
       setUser(data.user);
       return data;
     } catch (err) {
@@ -81,7 +90,7 @@ export function AuthProvider({ children }) {
   // Logout function
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout');
+      await api.post('/api/auth/logout');
       setUser(null);
     } catch (err) {
       console.error('Logout failed', err);
