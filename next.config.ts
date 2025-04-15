@@ -7,6 +7,12 @@ const nextConfig = {
     domains: ['llms-txt-generator.com'],
     
   },
+
+  // Explicitly disable App Router
+  experimental: {
+    appDir: false,
+  },
+
   
   // ESLint settings
   eslint: {

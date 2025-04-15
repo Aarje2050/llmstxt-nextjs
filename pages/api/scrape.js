@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       const { urls, bulkMode } = req.body;
       
       // Option 1: Proxy to your existing Flask backend
-      const response = await fetch('https://llmstxt-backend.onrender.com/api/scrape', {
+      const response = await fetch('http://127.0.0.1:5000/api/scrape', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

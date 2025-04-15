@@ -1,9 +1,15 @@
+
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './auth/AuthModal';
 
 function UrlInput({ onScrape, loading }) {
   const [urlInput, setUrlInput] = useState('');
   const [error, setError] = useState('');
   const [urlMode, setUrlMode] = useState('single'); // 'single' or 'bulk'
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
+  const { isAuthenticated } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,7 +66,14 @@ function UrlInput({ onScrape, loading }) {
       }
     }
     
-    // Call the parent handler with bulk mode flag
+    // Check if user is authenticated before proceeding
+    if (!isAuthenticated) {
+      // Open the auth modal instead of proceeding
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
+    // If authenticated, proceed with scraping
     onScrape(urls, bulkMode);
   };
   
@@ -134,6 +147,12 @@ function UrlInput({ onScrape, loading }) {
           {loading ? 'Processing...' : 'Generate Files'}
         </button>
       </form>
+      
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </div>
   );
 }
