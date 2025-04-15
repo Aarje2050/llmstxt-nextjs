@@ -36,53 +36,54 @@ function App() {
     }
   }, [router.query, router]);
   
- // In handleScrape function of pages/index.js
-const handleScrape = async (urls, bulkMode = false) => {
-  setLoading(true);
-  try {
-    // Show initial toast
-    const toastId = toast.info('Extracting website content. This may take a moment...', { autoClose: false });
-    
-    // Make direct API call to backend
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://llmstxt-backend.onrender.com';
-    
-    const response = await axios.post(`${BACKEND_URL}/api/scrape`, 
-      { urls, bulkMode }, 
-      { 
-        timeout: 120000,  // 2 minute timeout
-        withCredentials: true  // Include cookies
-      }
-    );
-    
-    // Update toast
-    toast.dismiss(toastId);
-    toast.success('Content extracted successfully!', {
-      autoClose: 3000
-    });
-    
-    // Process the results
-    setResults(response.data);
-    
-    // Set the first URL as active
-    if (Object.keys(response.data).length > 0) {
-      const firstUrl = Object.keys(response.data)[0];
-      setActiveUrl(firstUrl);
+  const handleScrape = async (urls, bulkMode = false) => {
+    setLoading(true);
+    try {
+      // Show initial toast
+      const toastId = toast.info('Extracting website content. This may take a moment...', { autoClose: false });
       
-      // If there are MD files for this URL, set the first one as active
-      const urlData = response.data[firstUrl];
-      if (urlData.status === 'success' && urlData.md_files) {
-        const mdUrls = Object.keys(urlData.md_files);
-        if (mdUrls.length > 0) {
-          setActiveMdFile(mdUrls[0]);
+      // Make direct API call to backend
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://llmstxt-backend.onrender.com';
+      
+      const response = await axios.post(`${BACKEND_URL}/api/scrape`, 
+        { urls, bulkMode }, 
+        {
+          timeout: 120000,  // 2 minute timeout
+          withCredentials: true  // Include cookies
+        }
+      );
+      
+      // Update toast
+      toast.dismiss(toastId);
+      toast.success('Content extracted successfully!', {
+        autoClose: 3000
+      });
+      
+      // Process the results
+      setResults(response.data);
+      
+      // Set the first URL as active
+      if (Object.keys(response.data).length > 0) {
+        const firstUrl = Object.keys(response.data)[0];
+        setActiveUrl(firstUrl);
+        
+        // If there are MD files for this URL, set the first one as active
+        const urlData = response.data[firstUrl];
+        if (urlData.status === 'success' && urlData.md_files) {
+          const mdUrls = Object.keys(urlData.md_files);
+          if (mdUrls.length > 0) {
+            setActiveMdFile(mdUrls[0]);
+          }
         }
       }
-    }
       
-      // Track usage if authenticated
+      // Track usage if authenticated - using the backend API directly
       if (isAuthenticated) {
-        await axios.post('/api/usage/track', { 
+        await axios.post(`${BACKEND_URL}/api/usage/track`, {
           type: 'generation',
-          urls 
+          urls
+        }, {
+          withCredentials: true  // Include cookies for authentication
         });
       }
       
