@@ -44,7 +44,7 @@ const RegisterForm = ({ onSuccess }) => {
       {formError && <div className="auth-error">{formError}</div>}
       
       <div className="form-group">
-        <label htmlFor="name">Full Name</label>
+        <label htmlFor="name">Your Full Name</label>
         <input
           id="name"
           type="text"
