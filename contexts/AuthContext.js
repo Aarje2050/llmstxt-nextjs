@@ -1,4 +1,4 @@
-// contexts/AuthContext.js (complete updated version)
+// contexts/AuthContext.js - add session storage
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -20,8 +20,17 @@ export function AuthProvider({ children }) {
     withCredentials: true, // Important for cookies
   });
 
-  // Check authentication on EVERY page change
+  // Load user from session storage on initial load
   useEffect(() => {
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        sessionStorage.removeItem('user');
+      }
+    }
+    
     const checkAuth = async () => {
       try {
         setLoading(true);
@@ -29,12 +38,16 @@ export function AuthProvider({ children }) {
         
         if (data.user) {
           setUser(data.user);
+          // Save to session storage
+          sessionStorage.setItem('user', JSON.stringify(data.user));
         } else {
           setUser(null);
+          sessionStorage.removeItem('user');
         }
       } catch (err) {
         console.error('Auth check error:', err);
         setUser(null);
+        sessionStorage.removeItem('user');
       } finally {
         setLoading(false);
       }
@@ -52,8 +65,10 @@ export function AuthProvider({ children }) {
       // Direct call to backend
       const { data } = await api.post('/api/auth/login', { email, password });
       
-      // Update user immediately
+      // Update user immediately and store in session
       setUser(data.user);
+      sessionStorage.setItem('user', JSON.stringify(data.user));
+      
       return data;
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed');
@@ -87,6 +102,8 @@ export function AuthProvider({ children }) {
       // Direct call to backend
       const { data } = await api.post('/api/auth/verify', { email, otp });
       setUser(data.user);
+      // Save to session storage
+      sessionStorage.setItem('user', JSON.stringify(data.user));
       return data;
     } catch (err) {
       setError(err.response?.data?.message || 'Verification failed');
@@ -102,9 +119,14 @@ export function AuthProvider({ children }) {
       // Direct call to backend
       await api.post('/api/auth/logout');
       setUser(null);
+      // Clear from session storage
+      sessionStorage.removeItem('user');
       router.push('/');
     } catch (err) {
       console.error('Logout error:', err);
+      // Still clear local session
+      setUser(null);
+      sessionStorage.removeItem('user');
     }
   };
 

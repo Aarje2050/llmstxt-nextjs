@@ -1,4 +1,4 @@
-// pages/dashboard.js
+// pages/dashboard.js (and other protected pages)
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -10,14 +10,22 @@ export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
+  // Client-side authentication check
   useEffect(() => {
-    // Only redirect after loading is complete and user is not authenticated
-    if (!loading && !isAuthenticated) {
-      router.push('/');
-    }
+    const checkAuth = () => {
+      // First check session storage directly
+      const storedUser = sessionStorage.getItem('user');
+      
+      // If not authenticated and not loading, redirect
+      if (!loading && !isAuthenticated && !storedUser) {
+        router.push('/?login=required');
+      }
+    };
+    
+    checkAuth();
   }, [loading, isAuthenticated, router]);
 
-  // Show loading state while authentication is being checked
+  // Show loading state while checking auth
   if (loading) {
     return (
       <div className="app">
@@ -35,11 +43,12 @@ export default function Dashboard() {
     );
   }
 
-  // Don't show the dashboard if not authenticated
+  // Don't render page if not authenticated
   if (!isAuthenticated) {
-    return null; // This will show nothing briefly before the redirect happens
+    return null; // This will show nothing briefly before redirect
   }
 
+  // If we get here, user is authenticated
   return (
     <>
       <Head>
