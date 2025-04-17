@@ -1,4 +1,4 @@
-// components/auth/OtpVerification.js
+// components/auth/OtpVerification.js - Optimized version
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -9,7 +9,7 @@ const OtpVerification = ({ email, onSuccess, onResend }) => {
   const [timeLeft, setTimeLeft] = useState(30); // 30 second countdown for resend
   
   const inputRefs = useRef([]);
-  const { verifyOtp } = useAuth();
+  const { verifyOtp, register } = useAuth();
   
   // Setup countdown timer for resend button
   useEffect(() => {
@@ -88,9 +88,15 @@ const OtpVerification = ({ email, onSuccess, onResend }) => {
     }
   };
   
-  const handleResend = () => {
-    onResend();
-    setTimeLeft(30); // Reset countdown
+  const handleResend = async () => {
+    try {
+      setFormError('');
+      // Re-register with the same email to trigger a new OTP
+      await register(email, email, 'resendOtp');
+      setTimeLeft(30); // Reset countdown
+    } catch (err) {
+      setFormError('Failed to resend verification code. Please try again.');
+    }
   };
 
   return (
@@ -114,7 +120,7 @@ const OtpVerification = ({ email, onSuccess, onResend }) => {
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               disabled={isSubmitting}
-              className="otp-input"
+              className={`otp-input ${isSubmitting ? 'disabled' : ''}`}
               required
             />
           ))}
@@ -122,10 +128,17 @@ const OtpVerification = ({ email, onSuccess, onResend }) => {
         
         <button 
           type="submit" 
-          className="auth-submit-btn"
+          className={`auth-submit-btn ${isSubmitting ? 'loading' : ''}`}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Verifying...' : 'Verify Code'}
+          {isSubmitting ? (
+            <>
+              <span className="btn-spinner"></span>
+              Verifying...
+            </>
+          ) : (
+            'Verify Code'
+          )}
         </button>
       </form>
       

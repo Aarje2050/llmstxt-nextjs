@@ -1,11 +1,10 @@
+// pages/_app.js - Updated to include skeleton styles
 import { AuthProvider } from '../contexts/AuthContext';
 import '../styles/auth.css';
 import '../styles/TokenAnalytics.css';
 import '../styles/main.css';
 import '../components/TokenCounter.css';
-
-// Other global styles...
-
+import '../styles/skeleton.css'; // Added skeleton styles
 
 function MyApp({ Component, pageProps }) {
   return (

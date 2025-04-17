@@ -1,23 +1,25 @@
-// middleware.js
+// pages/_middleware.js
 import { NextResponse } from 'next/server';
-import { verifyToken } from './lib/auth';
 
-export function middleware(request) {
-  // Protected routes
-  const protectedPaths = ['/dashboard', '/settings', '/history'];
-  const path = request.nextUrl.pathname;
+export function middleware(req) {
+  const { pathname } = req.nextUrl;
+  const token = req.cookies.auth_token;
   
-  if (protectedPaths.some(route => path.startsWith(route))) {
-    const token = request.cookies.get('auth_token')?.value;
-    
-    if (!token) {
-      return NextResponse.redirect(new URL('/?login=required', request.url));
-    }
+  // Define protected routes that require authentication
+  const protectedRoutes = ['/dashboard', '/settings', '/history'];
+  
+  // Check if the current path is a protected route
+  const isProtectedRoute = protectedRoutes.some(route => 
+    pathname === route || pathname.startsWith(`${route}/`)
+  );
+  
+  // If it's a protected route and there's no token, redirect to login
+  if (isProtectedRoute && !token) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/';
+    url.searchParams.set('login', 'required');
+    return NextResponse.redirect(url);
   }
   
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ['/dashboard/:path*', '/settings/:path*', '/history/:path*'],
-};

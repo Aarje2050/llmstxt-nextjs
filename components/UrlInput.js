@@ -1,4 +1,4 @@
-
+// components/UrlInput.js - Optimized version
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './auth/AuthModal';
@@ -44,20 +44,18 @@ function UrlInput({ onScrape, loading }) {
         return;
       }
     } else {
-      // Bulk mode - this is disabled in the UI but keeping logic for future
+      // Bulk mode - reserved for future implementation
       urls = urlInput
         .split('\n')
         .map(url => url.trim())
         .filter(url => url !== '')
         .map(url => !url.startsWith('http://') && !url.startsWith('https://') ? 'https://' + url : url);
       
-      // Validate URLs
       if (urls.length === 0) {
         setError('Please enter at least one URL');
         return;
       }
       
-      // Check for invalid URLs
       try {
         urls.forEach(url => new URL(url));
       } catch (_) {
@@ -78,7 +76,7 @@ function UrlInput({ onScrape, loading }) {
   };
   
   const toggleUrlMode = (mode) => {
-    // Only allow switching to single mode
+    // Only allow switching to single mode for now
     if (mode === 'single') {
       setUrlMode(mode);
     }
@@ -117,6 +115,7 @@ function UrlInput({ onScrape, loading }) {
               placeholder="example.com"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
+              disabled={loading}
               required
             />
           ) : (
@@ -126,8 +125,8 @@ function UrlInput({ onScrape, loading }) {
               placeholder="example.com"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
+              disabled={true}
               required
-              disabled
             />
           )}
         </div>
@@ -140,11 +139,18 @@ function UrlInput({ onScrape, loading }) {
         
         <button 
           type="submit" 
-          className="btn" 
+          className={`btn ${loading ? 'btn-loading' : ''}`}
           disabled={loading}
-          style={{ backgroundColor: '#0171ce' }}
+          style={{ backgroundColor: loading ? '#75a7e5' : '#0171ce' }}
         >
-          {loading ? 'Processing...' : 'Generate Files'}
+          {loading ? (
+            <>
+              <span className="btn-spinner"></span>
+              Processing...
+            </>
+          ) : (
+            'Generate Files'
+          )}
         </button>
       </form>
       

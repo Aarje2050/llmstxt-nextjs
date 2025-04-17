@@ -1,4 +1,4 @@
-// components/auth/AuthModal.js
+// components/auth/AuthModal.js - Optimized version
 import React, { useState, useEffect } from 'react';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
@@ -7,11 +7,21 @@ import OtpVerification from './OtpVerification';
 const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
   const [view, setView] = useState(initialView);
   const [email, setEmail] = useState('');
+  const [closing, setClosing] = useState(false);
 
   // Update view if initialView changes
   useEffect(() => {
     setView(initialView);
   }, [initialView]);
+
+  // Handle smooth closing animation
+  const handleClose = () => {
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      onClose();
+    }, 300);
+  };
 
   if (!isOpen) return null;
 
@@ -21,17 +31,26 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
   };
 
   const handleLoginSuccess = () => {
-    onClose();
+    handleClose();
   };
 
   const handleVerificationSuccess = () => {
-    onClose();
+    handleClose();
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
   };
 
   return (
-    <div className="auth-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="auth-modal">
-        <button className="close-button" onClick={onClose}>×</button>
+    <div 
+      className={`auth-modal-overlay ${closing ? 'closing' : ''}`} 
+      onClick={handleBackdropClick}
+    >
+      <div className={`auth-modal ${closing ? 'closing' : ''}`}>
+        <button className="close-button" onClick={handleClose}>×</button>
         
         <div className="auth-modal-header">
           {view === 'login' && (

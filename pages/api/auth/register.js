@@ -67,8 +67,8 @@ export default async function handler(req, res) {
         email
       });
 
-    console.log('User registered successfully:', email);
-    console.log('*** OTP FOR TESTING ***:', otp); // For development only
+    // console.log('User registered successfully:', email);
+    // console.log('*** OTP FOR TESTING ***:', otp); // For development only
 
     // Return success
     return res.status(200).json({

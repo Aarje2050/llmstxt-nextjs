@@ -1,4 +1,4 @@
-// components/auth/RegisterForm.js
+// components/auth/RegisterForm.js - Optimized version
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -29,11 +29,6 @@ const RegisterForm = ({ onSuccess }) => {
       setIsSubmitting(true);
       setFormError('');
       const response = await register(name, email, password);
-      
-      // For testing only - show OTP if returned (development environment)
-      if (response.otp) {
-        setFormError(`DEV MODE: Your verification code is ${response.otp}`);
-      }
       
       // Pass the email to the parent so OTP verification knows where to send code
       onSuccess(email);
@@ -89,10 +84,17 @@ const RegisterForm = ({ onSuccess }) => {
       
       <button 
         type="submit" 
-        className="auth-submit-btn"
+        className={`auth-submit-btn ${isSubmitting ? 'loading' : ''}`}
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Creating account...' : 'Create account'}
+        {isSubmitting ? (
+          <>
+            <span className="btn-spinner"></span>
+            Creating account...
+          </>
+        ) : (
+          'Create account'
+        )}
       </button>
     </form>
   );

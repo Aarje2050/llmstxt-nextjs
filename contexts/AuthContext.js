@@ -1,8 +1,9 @@
-// contexts/AuthContext.js
+// contexts/AuthContext.js - Optimized version
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
-// Base URL for your Python backend
+// Base URL for the backend
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://llmstxt-backend.onrender.com';
 
 const AuthContext = createContext(null);
@@ -11,6 +12,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   // Configure axios with credentials
   const api = axios.create({
@@ -29,7 +31,6 @@ export function AuthProvider({ children }) {
           setUser(data.user);
         }
       } catch (err) {
-        console.error('Error loading user', err);
         // User is not authenticated or there was an error
         setUser(null);
       } finally {
@@ -56,21 +57,15 @@ export function AuthProvider({ children }) {
     }
   };
 
-// In contexts/AuthContext.js - update the register function
-const register = async (name, email, password) => {
+  // Register function
+  const register = async (name, email, password) => {
     try {
       setLoading(true);
       setError(null);
       const { data } = await api.post('/api/auth/register', { name, email, password });
-      
-      // If we got a response but there was a MongoDB error, show the OTP anyway
-      // This is for development/testing when the in-memory DB fallback is active
-      console.log("Registration response:", data);
-      
       return data;
     } catch (err) {
-      console.error("Registration error:", err);
-      setError(err.response?.data?.message || 'Registration failed. Database connection issue.');
+      setError(err.response?.data?.message || 'Registration failed');
       throw err;
     } finally {
       setLoading(false);
@@ -98,8 +93,9 @@ const register = async (name, email, password) => {
     try {
       await api.post('/api/auth/logout');
       setUser(null);
+      router.push('/');
     } catch (err) {
-      console.error('Logout failed', err);
+      console.error('Logout error:', err);
     }
   };
 

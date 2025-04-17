@@ -1,4 +1,4 @@
-// components/auth/LoginForm.js
+// components/auth/LoginForm.js - Optimized version
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -63,10 +63,17 @@ const LoginForm = ({ onSuccess }) => {
       
       <button 
         type="submit" 
-        className="auth-submit-btn"
+        className={`auth-submit-btn ${isSubmitting ? 'loading' : ''}`}
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Signing in...' : 'Sign in'}
+        {isSubmitting ? (
+          <>
+            <span className="btn-spinner"></span>
+            Signing in...
+          </>
+        ) : (
+          'Sign in'
+        )}
       </button>
     </form>
   );
