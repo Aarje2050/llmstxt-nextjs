@@ -1,38 +1,49 @@
-// pages/dashboard.js - Updated version
+// pages/dashboard.js
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
 export default function Dashboard() {
-  const { user, loading, isAuthenticated, authChecked } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Only redirect if auth has been checked and user is not authenticated
   useEffect(() => {
-    if (authChecked && !isAuthenticated && !loading) {
-      router.push('/?login=required');
+    // Only redirect after loading is complete and user is not authenticated
+    if (!loading && !isAuthenticated) {
+      router.push('/');
     }
-  }, [authChecked, isAuthenticated, loading, router]);
+  }, [loading, isAuthenticated, router]);
 
-  // Show skeleton loader while loading
-  if (loading || !authChecked) {
-    return <DashboardSkeleton />;
+  // Show loading state while authentication is being checked
+  if (loading) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="main-content">
+          <div className="container">
+            <div className="loader">
+              <div className="loader-spinner"></div>
+              <p>Loading your dashboard...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
-  // Don't render anything if not authenticated (will redirect)
+  // Don't show the dashboard if not authenticated
   if (!isAuthenticated) {
-    return null;
+    return null; // This will show nothing briefly before the redirect happens
   }
 
   return (
     <>
       <Head>
         <title>Dashboard | LLMs.txt Generator</title>
-        <meta name="description" content="Manage your LLMs.txt Generator account and view your usage statistics." />
       </Head>
       
       <div className="app">

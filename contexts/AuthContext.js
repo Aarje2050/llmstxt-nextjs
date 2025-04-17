@@ -1,4 +1,4 @@
-// contexts/AuthContext.js
+// contexts/AuthContext.js (complete updated version)
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
       setLoading(true);
       setError(null);
       
-      // Direct call to backend to avoid proxying issues
+      // Direct call to backend
       const { data } = await api.post('/api/auth/login', { email, password });
       
       // Update user immediately
@@ -63,7 +63,50 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // The rest of your functions...
+  // Register function 
+  const register = async (name, email, password) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Direct call to backend
+      const { data } = await api.post('/api/auth/register', { name, email, password });
+      return data;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify OTP function
+  const verifyOtp = async (email, otp) => {
+    try {
+      setLoading(true);
+      setError(null);
+      // Direct call to backend
+      const { data } = await api.post('/api/auth/verify', { email, otp });
+      setUser(data.user);
+      return data;
+    } catch (err) {
+      setError(err.response?.data?.message || 'Verification failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = async () => {
+    try {
+      // Direct call to backend
+      await api.post('/api/auth/logout');
+      setUser(null);
+      router.push('/');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
+  };
 
   return (
     <AuthContext.Provider 
@@ -83,6 +126,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// Custom hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === null) {
