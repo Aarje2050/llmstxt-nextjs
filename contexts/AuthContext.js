@@ -1,4 +1,4 @@
-// contexts/AuthContext.js - Optimized version
+// contexts/AuthContext.js - Updated for persistent auth
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const router = useRouter();
 
   // Configure axios with credentials
@@ -20,26 +21,29 @@ export function AuthProvider({ children }) {
     withCredentials: true
   });
 
-  // Check if user is already authenticated on app load
+  // Check authentication on initial load and page changes
   useEffect(() => {
-    async function loadUserFromCookies() {
+    const checkAuth = async () => {
       try {
         setLoading(true);
-        // Get current authenticated user from backend
         const { data } = await api.get('/api/auth/me');
+        
         if (data.user) {
           setUser(data.user);
+        } else {
+          setUser(null);
         }
       } catch (err) {
-        // User is not authenticated or there was an error
+        console.error('Auth check error:', err);
         setUser(null);
       } finally {
         setLoading(false);
+        setAuthChecked(true);
       }
-    }
+    };
 
-    loadUserFromCookies();
-  }, []);
+    checkAuth();
+  }, [router.pathname]); // Re-check auth when pathname changes
 
   // Login function
   const login = async (email, password) => {
@@ -109,7 +113,8 @@ export function AuthProvider({ children }) {
         register, 
         verifyOtp, 
         logout, 
-        isAuthenticated: !!user 
+        isAuthenticated: !!user,
+        authChecked
       }}
     >
       {children}

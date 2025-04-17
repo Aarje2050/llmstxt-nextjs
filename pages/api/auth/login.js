@@ -41,12 +41,13 @@ export default async function handler(req, res) {
     // Generate token
     const token = generateToken(user);
 
-    // Set cookie
+    // Set cookie with updated settings for cross-domain use
     setCookie(res, 'auth_token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true, // Always use secure cookies in production and development
       maxAge: 30 * 24 * 60 * 60, // 30 days
       path: '/',
+      sameSite: 'none', // Important for cross-domain cookies
     });
 
     // Return user data (excluding password)

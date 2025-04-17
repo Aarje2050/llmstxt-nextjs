@@ -1,4 +1,4 @@
-// pages/dashboard.js - Optimized version
+// pages/dashboard.js - Updated version
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -8,18 +8,18 @@ import Footer from '../components/Footer';
 import DashboardSkeleton from '../components/skeletons/DashboardSkeleton';
 
 export default function Dashboard() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, authChecked } = useAuth();
   const router = useRouter();
 
-  // Redirect if not authenticated after loading completes
+  // Only redirect if auth has been checked and user is not authenticated
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (authChecked && !isAuthenticated && !loading) {
       router.push('/?login=required');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [authChecked, isAuthenticated, loading, router]);
 
   // Show skeleton loader while loading
-  if (loading) {
+  if (loading || !authChecked) {
     return <DashboardSkeleton />;
   }
 
