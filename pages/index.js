@@ -39,7 +39,7 @@ function Home() {
     }
   }, [router.query, router]);
   
-  const handleScrape = async (urls, bulkMode = false) => {
+  const handleScrape = async (urls, bulkMode = false, useSitemap = true) => {
     setLoading(true);
     try {
       // Show initial toast
@@ -49,7 +49,7 @@ function Home() {
       const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://llmstxt-backend.onrender.com';
       
       const response = await axios.post(`${BACKEND_URL}/api/scrape`, 
-        { urls, bulkMode }, 
+        { urls, bulkMode, useSitemap }, 
         {
           timeout: 120000,  // 2 minute timeout
           withCredentials: true  // Include cookies
@@ -58,7 +58,9 @@ function Home() {
       
       // Update toast
       toast.dismiss(toastId);
-      toast.success('Content extracted successfully!');
+      toast.success('Content extracted successfully!', {
+        autoClose: 3000
+      });
       
       // Process the results
       setResults(response.data);
@@ -78,27 +80,33 @@ function Home() {
         }
       }
       
-      // Track usage if authenticated
+      // Track usage if authenticated - using the backend API directly
       if (isAuthenticated) {
         await axios.post(`${BACKEND_URL}/api/usage/track`, {
           type: 'generation',
           urls
         }, {
-          withCredentials: true
+          withCredentials: true  // Include cookies for authentication
         });
       }
       
     } catch (error) {
+      console.error('Error scraping URLs:', error);
+      
       let errorMessage = 'Failed to extract content.';
       
       if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
         errorMessage += ` Server error: ${error.response.status}`;
         if (error.response.data && error.response.data.error) {
           errorMessage += ` - ${error.response.data.error}`;
         }
       } else if (error.request) {
+        // The request was made but no response was received
         errorMessage += ' No response from server. Please check if the backend is running.';
       } else {
+        // Something happened in setting up the request that triggered an Error
         errorMessage += ` Error: ${error.message}`;
       }
       
